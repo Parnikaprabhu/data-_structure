@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <ctype.h>   
+#include <string.h>
+
+#define MAX 100
+
+char stack[MAX];
+int top = -1;
+
+
+void push(char c) {
+    if (top == MAX - 1) {
+        printf("Stack Overflow\n");
+    } else {
+        stack[++top] = c;
+    }
+}
+
+
+char pop() {
+    if (top == -1) {
+        printf("Stack Underflow\n");
+        return -1;
+    } else {
+        return stack[top--];
+    }
+}
+
+
+int precedence(char op) {
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    return 0;
+}
+
+
+void infixToPostfix(char infix[], char postfix[]) {
+    int i, k = 0;
+    char symbol;
+
+    for (i = 0; i < strlen(infix); i++) {
+        symbol = infix[i];
+
+        // If operand, add to postfix
+        if (isalnum(symbol)) {
+            postfix[k++] = symbol;
+        }
+        // If '(', push to stack
+        else if (symbol == '(') {
+            push(symbol);
+        }
+        // If ')', pop until '('
+        else if (symbol == ')') {
+            while (top != -1 && stack[top] != '(') {
+                postfix[k++] = pop();
+            }
+            pop(); // remove '('
+        }
+        // If operator
+        else {
+            while (top != -1 && precedence(stack[top]) >= precedence(symbol)) {
+                postfix[k++] = pop();
+            }
+            push(symbol);
+        }
+    }
+
+   
+    while (top != -1) {
+        postfix[k++] = pop();
+    }
+
+    postfix[k] = '\0'; // Null terminate string
+}
+
+int main() {
+    char infix[MAX], postfix[MAX];
+
+    printf("Enter a valid parenthesized infix expression: ");
+    scanf("%s", infix);
+
+    infixToPostfix(infix, postfix);
+
+    printf("Postfix expression: %s\n", postfix);
+
+    return 0;
+}
